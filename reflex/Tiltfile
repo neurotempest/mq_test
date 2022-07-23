@@ -1,0 +1,31 @@
+# -*- mode: Python -*-
+
+
+services = [
+  'consumer',
+  'producer',
+]
+
+for service in services:
+  local_resource(
+    '{0}-go-compile'.format(service),
+    'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build/{0}_main ./src/{0}/{0}'.format(service),
+    deps=['./src/{0}'.format(service)],
+  )
+
+docker_build(
+  ref='microservice-image',
+  context='.',
+  dockerfile='deployments/Dockerfile.microservice',
+)
+
+k8s_yaml('deployments/consumer_k8s.yml')
+k8s_resource(
+  'consumer',
+)
+
+k8s_yaml('deployments/producer_k8s.yml')
+k8s_resource(
+  'producer',
+)
+
