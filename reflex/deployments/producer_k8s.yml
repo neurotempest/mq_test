@@ -1,21 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: producer
+  name: myapp
   labels:
-    app: producer
+    app: myapp
 spec:
+  hostNetwork: true
   selector:
     matchLabels:
-      app: producer
+      app: myapp
   template:
     metadata:
       labels:
-        app: producer
+        app: myapp
     spec:
       containers:
         - name: producer
           image: microservice-image
           command:
             - /build/producer_main
-
+          ports:
+            - containerPort: 1234
+        - name: consumer
+          image: microservice-image
+          command:
+            - /build/consumer_main

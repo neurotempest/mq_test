@@ -5,6 +5,7 @@ metadata:
   labels:
     app: consumer
 spec:
+  hostNetwork: true
   selector:
     matchLabels:
       app: consumer

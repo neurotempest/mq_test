@@ -19,13 +19,17 @@ docker_build(
   dockerfile='deployments/Dockerfile.microservice',
 )
 
-k8s_yaml('deployments/consumer_k8s.yml')
-k8s_resource(
-  'consumer',
-)
+#k8s_yaml('deployments/consumer_k8s.yml')
+#k8s_resource(
+#  'consumer',
+#)
 
 k8s_yaml('deployments/producer_k8s.yml')
 k8s_resource(
-  'producer',
+  'myapp',
 )
+
+#k8s_resource(
+#  'consumer',
+#)
 

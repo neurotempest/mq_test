@@ -1,0 +1,16 @@
+package state
+
+//go:generate stategen --inputFile=state.go --inputStruct=stateImpl --outputInterface=State --outputFile=state_gen.go
+
+import (
+)
+
+type stateImpl struct {
+}
+
+func New() *stateImpl {
+
+	return &stateImpl{
+	}
+}
+

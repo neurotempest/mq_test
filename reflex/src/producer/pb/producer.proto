@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package='github.com/neurotempest/mq_test/reflex/src/producer/pb';
+
+service Producer {
+  rpc Ping (PingRequest) returns (PingResponse) {}
+}
+
+message PingRequest {
+  string msg = 1;
+}
+
+message PingResponse {
+}
