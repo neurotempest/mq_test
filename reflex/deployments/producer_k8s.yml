@@ -1,18 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: producer-api
+spec:
+  type: ClusterIP
+  selector:
+    app: producer
+  ports:
+    - port: 1234
+      targetPort: 1234
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: myapp
+  name: producer
   labels:
-    app: myapp
+    app: producer
 spec:
   hostNetwork: true
   selector:
     matchLabels:
-      app: myapp
+      app: producer
   template:
     metadata:
       labels:
-        app: myapp
+        app: producer
     spec:
       containers:
         - name: producer
@@ -21,7 +33,3 @@ spec:
             - /build/producer_main
           ports:
             - containerPort: 1234
-        - name: consumer
-          image: microservice-image
-          command:
-            - /build/consumer_main

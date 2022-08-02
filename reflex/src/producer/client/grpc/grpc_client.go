@@ -2,8 +2,8 @@ package grpc
 
 import (
 	"context"
-	"errors"
 	"flag"
+	"fmt"
 	"time"
 
 	"google.golang.org/grpc"
@@ -36,7 +36,7 @@ func New() (*client, error) {
 			break
 		}
 		if !conn.WaitForStateChange(ctx, conn.GetState()) {
-			return nil, errors.New("grpc timeout whilst connecting")
+			return nil, fmt.Errorf("grpc timeout whilst connecting to %s", *address)
 		}
 	}
 

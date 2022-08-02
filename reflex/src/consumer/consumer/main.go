@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -11,6 +12,8 @@ import (
 )
 
 func main() {
+
+	flag.Parse()
 
 	log.Println("Hello world from consumer")
 

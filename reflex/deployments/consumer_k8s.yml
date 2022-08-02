@@ -1,3 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: consumer-api
+spec:
+  type: ClusterIP
+  selector:
+    app: consumer
+  ports:
+    - port: 5678
+      targetPort: 5678
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,5 +31,6 @@ spec:
           image: microservice-image
           command:
             - /build/consumer_main
-
-
+            - -producer_grpc_address=producer-api:1234
+          ports:
+            - containerPort: 5678
