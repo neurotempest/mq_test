@@ -30,6 +30,10 @@ spec:
         - name: producer
           image: microservice-image
           command:
+            #- /bin/sh
+            #- -c
+            #- sleep infinity
             - /build/producer_main
+            - -consumer_grpc_address=consumer-api:5678
           ports:
             - containerPort: 1234

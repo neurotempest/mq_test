@@ -3,11 +3,8 @@ package grpc
 import (
 	"context"
 	"flag"
-	"fmt"
-	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 
 	"github.com/neurotempest/mq_test/reflex/src/producer"
 	"github.com/neurotempest/mq_test/reflex/src/producer/pb"
@@ -26,18 +23,6 @@ func New() (*client, error) {
 	conn, err := grpc.Dial(*address, grpc.WithInsecure())
 	if err != nil {
 		return nil, err
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	for {
-		if conn.GetState() == connectivity.Ready {
-			break
-		}
-		if !conn.WaitForStateChange(ctx, conn.GetState()) {
-			return nil, fmt.Errorf("grpc timeout whilst connecting to %s", *address)
-		}
 	}
 
 	return &client{

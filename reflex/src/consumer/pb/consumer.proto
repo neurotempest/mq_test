@@ -1,8 +1,10 @@
 syntax = "proto3";
 
-option go_package='github.com/neurotempest/mq_test/reflex/src/producer/pb';
+package consumer;
 
-service Producer {
+option go_package='github.com/neurotempest/mq_test/reflex/src/consumer/pb';
+
+service Consumer {
   rpc Ping (PingRequest) returns (PingResponse) {}
 }
 

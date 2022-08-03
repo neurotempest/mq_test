@@ -2,8 +2,8 @@ package server
 
 import (
 	"context"
-	"log"
 
+	"github.com/neurotempest/mq_test/reflex/src/producer/ops"
 	"github.com/neurotempest/mq_test/reflex/src/producer/pb"
 	"github.com/neurotempest/mq_test/reflex/src/producer/state"
 )
@@ -27,7 +27,10 @@ func (s *server) Ping(
 	req *pb.PingRequest,
 ) (*pb.PingResponse, error) {
 
-	log.Println("Producer.Ping!!")
+	err := ops.Ping(ctx, s.state, req.Msg)
+	if err != nil {
+		return nil, err
+	}
 
 	return &pb.PingResponse{}, nil
 }

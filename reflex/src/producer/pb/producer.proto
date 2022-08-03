@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package producer;
+
 option go_package='github.com/neurotempest/mq_test/reflex/src/producer/pb';
 
 service Producer {

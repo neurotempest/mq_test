@@ -1,15 +1,18 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"net"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"google.golang.org/grpc"
 
+	"github.com/neurotempest/mq_test/reflex/src/producer/ops"
 	"github.com/neurotempest/mq_test/reflex/src/producer/pb"
 	"github.com/neurotempest/mq_test/reflex/src/producer/server"
 	"github.com/neurotempest/mq_test/reflex/src/producer/state"
@@ -21,11 +24,15 @@ func main() {
 
 	flag.Parse()
 
-	log.Println("Hello world from producer")
+	ctx, cancel := context.WithCancel(context.Background())
+
+	var wg sync.WaitGroup
 
 	st := state.New()
 
 	grpcStopFn := ServeGRPCForever(st)
+
+	ops.StartLoops(ctx, &wg, st)
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
@@ -33,7 +40,9 @@ func main() {
 	select {
 	case sig := <-ch:
 		log.Println("Received OS signal:", sig.String())
+		cancel()
 		grpcStopFn()
+		wg.Wait()
 		return
 	}
 }
@@ -53,6 +62,8 @@ func ServeGRPCForever(st state.State) func() {
 		err := grpcServer.Serve(lis)
 		log.Fatal("grpc server exited:", err.Error())
 	}()
+
+	log.Println("GRPC listening on", *grpcAddr, "...")
 
 	return func() {
 		log.Println("waiting for grpc server to stop...")

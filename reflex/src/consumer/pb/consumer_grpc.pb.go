@@ -18,86 +18,86 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// ProducerClient is the client API for Producer service.
+// ConsumerClient is the client API for Consumer service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ProducerClient interface {
+type ConsumerClient interface {
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
 }
 
-type producerClient struct {
+type consumerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewProducerClient(cc grpc.ClientConnInterface) ProducerClient {
-	return &producerClient{cc}
+func NewConsumerClient(cc grpc.ClientConnInterface) ConsumerClient {
+	return &consumerClient{cc}
 }
 
-func (c *producerClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
+func (c *consumerClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
 	out := new(PingResponse)
-	err := c.cc.Invoke(ctx, "/Producer/Ping", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/consumer.Consumer/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ProducerServer is the server API for Producer service.
-// All implementations must embed UnimplementedProducerServer
+// ConsumerServer is the server API for Consumer service.
+// All implementations must embed UnimplementedConsumerServer
 // for forward compatibility
-type ProducerServer interface {
+type ConsumerServer interface {
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
-	mustEmbedUnimplementedProducerServer()
+	mustEmbedUnimplementedConsumerServer()
 }
 
-// UnimplementedProducerServer must be embedded to have forward compatible implementations.
-type UnimplementedProducerServer struct {
+// UnimplementedConsumerServer must be embedded to have forward compatible implementations.
+type UnimplementedConsumerServer struct {
 }
 
-func (UnimplementedProducerServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
+func (UnimplementedConsumerServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
-func (UnimplementedProducerServer) mustEmbedUnimplementedProducerServer() {}
+func (UnimplementedConsumerServer) mustEmbedUnimplementedConsumerServer() {}
 
-// UnsafeProducerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ProducerServer will
+// UnsafeConsumerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ConsumerServer will
 // result in compilation errors.
-type UnsafeProducerServer interface {
-	mustEmbedUnimplementedProducerServer()
+type UnsafeConsumerServer interface {
+	mustEmbedUnimplementedConsumerServer()
 }
 
-func RegisterProducerServer(s grpc.ServiceRegistrar, srv ProducerServer) {
-	s.RegisterService(&Producer_ServiceDesc, srv)
+func RegisterConsumerServer(s grpc.ServiceRegistrar, srv ConsumerServer) {
+	s.RegisterService(&Consumer_ServiceDesc, srv)
 }
 
-func _Producer_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Consumer_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProducerServer).Ping(ctx, in)
+		return srv.(ConsumerServer).Ping(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Producer/Ping",
+		FullMethod: "/consumer.Consumer/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProducerServer).Ping(ctx, req.(*PingRequest))
+		return srv.(ConsumerServer).Ping(ctx, req.(*PingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Producer_ServiceDesc is the grpc.ServiceDesc for Producer service.
+// Consumer_ServiceDesc is the grpc.ServiceDesc for Consumer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Producer_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Producer",
-	HandlerType: (*ProducerServer)(nil),
+var Consumer_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "consumer.Consumer",
+	HandlerType: (*ConsumerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Ping",
-			Handler:    _Producer_Ping_Handler,
+			Handler:    _Consumer_Ping_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -35,7 +35,7 @@ func NewProducerClient(cc grpc.ClientConnInterface) ProducerClient {
 
 func (c *producerClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
 	out := new(PingResponse)
-	err := c.cc.Invoke(ctx, "/Producer/Ping", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/producer.Producer/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func _Producer_Ping_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Producer/Ping",
+		FullMethod: "/producer.Producer/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProducerServer).Ping(ctx, req.(*PingRequest))
@@ -92,7 +92,7 @@ func _Producer_Ping_Handler(srv interface{}, ctx context.Context, dec func(inter
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Producer_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Producer",
+	ServiceName: "producer.Producer",
 	HandlerType: (*ProducerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
