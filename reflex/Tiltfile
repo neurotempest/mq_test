@@ -6,11 +6,31 @@ services = [
   'producer',
 ]
 
+k8s_yaml('deployments/mysql_k8s.yml')
+k8s_resource(
+  'mysql',
+  port_forwards = '1122:3306',
+  labels=['db'],
+)
+
+mysql_cmd='mysql -h 127.0.0.1 -P 1122 -uroot -pexamplepw -v'
+
 for service in services:
   local_resource(
     '{0}-go-compile'.format(service),
     'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build/{0}_main ./src/{0}/{0}'.format(service),
-    deps=['./src/{0}'.format(service)],
+    deps=['./src/{0}/'.format(service)],
+    labels=['services'],
+  )
+
+  local_resource(
+    name='{0}-db'.format(service),
+    cmd=''.join((
+      '{0} -e "drop database if exists {1}_db; create database {1}_db" &&',
+      '{0} {1}_db < src/{1}/db/schema.sql',
+    )).format(mysql_cmd, service),
+    resource_deps=['mysql'],
+    labels=['db'],
   )
 
 docker_build(
@@ -22,10 +42,21 @@ docker_build(
 k8s_yaml('deployments/consumer_k8s.yml')
 k8s_resource(
   'consumer',
+  resource_deps=[
+    'consumer-db',
+    'consumer-go-compile',
+  ],
+  labels=['services'],
 )
 
 k8s_yaml('deployments/producer_k8s.yml')
 k8s_resource(
   'producer',
+  resource_deps=[
+    'producer-db',
+    'producer-go-compile',
+  ],
+  labels=['services'],
 )
+
 
