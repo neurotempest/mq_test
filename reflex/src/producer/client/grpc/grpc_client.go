@@ -5,6 +5,8 @@ import (
 	"flag"
 
 	"google.golang.org/grpc"
+	"github.com/luno/reflex"
+	"github.com/luno/reflex/reflexpb"
 
 	"github.com/neurotempest/mq_test/reflex/src/producer"
 	"github.com/neurotempest/mq_test/reflex/src/producer/pb"
@@ -43,4 +45,22 @@ func (c *client) Ping(
 		},
 	)
 	return err
+}
+
+func (c *client) StreamProducerEvents(
+	ctx context.Context,
+	after string,
+	opts ...reflex.StreamOption,
+) (reflex.StreamClient, error) {
+
+	streamFn := reflex.WrapStreamPB(
+		func(
+			ctx context.Context,
+			req *reflexpb.StreamRequest,
+		) (reflex.StreamClientPB, error) {
+			return c.rpcClient.StreamProducerEvents(ctx, req)
+		},
+	)
+
+	return streamFn(ctx, after, opts...)
 }

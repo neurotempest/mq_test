@@ -8,6 +8,7 @@ package pb
 
 import (
 	context "context"
+	reflexpb "github.com/luno/reflex/reflexpb"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -22,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProducerClient interface {
+	StreamProducerEvents(ctx context.Context, in *reflexpb.StreamRequest, opts ...grpc.CallOption) (Producer_StreamProducerEventsClient, error)
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
 }
 
@@ -31,6 +33,38 @@ type producerClient struct {
 
 func NewProducerClient(cc grpc.ClientConnInterface) ProducerClient {
 	return &producerClient{cc}
+}
+
+func (c *producerClient) StreamProducerEvents(ctx context.Context, in *reflexpb.StreamRequest, opts ...grpc.CallOption) (Producer_StreamProducerEventsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Producer_ServiceDesc.Streams[0], "/producer.Producer/StreamProducerEvents", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &producerStreamProducerEventsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Producer_StreamProducerEventsClient interface {
+	Recv() (*reflexpb.Event, error)
+	grpc.ClientStream
+}
+
+type producerStreamProducerEventsClient struct {
+	grpc.ClientStream
+}
+
+func (x *producerStreamProducerEventsClient) Recv() (*reflexpb.Event, error) {
+	m := new(reflexpb.Event)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *producerClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
@@ -46,6 +80,7 @@ func (c *producerClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc
 // All implementations must embed UnimplementedProducerServer
 // for forward compatibility
 type ProducerServer interface {
+	StreamProducerEvents(*reflexpb.StreamRequest, Producer_StreamProducerEventsServer) error
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
 	mustEmbedUnimplementedProducerServer()
 }
@@ -54,6 +89,9 @@ type ProducerServer interface {
 type UnimplementedProducerServer struct {
 }
 
+func (UnimplementedProducerServer) StreamProducerEvents(*reflexpb.StreamRequest, Producer_StreamProducerEventsServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamProducerEvents not implemented")
+}
 func (UnimplementedProducerServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
@@ -68,6 +106,27 @@ type UnsafeProducerServer interface {
 
 func RegisterProducerServer(s grpc.ServiceRegistrar, srv ProducerServer) {
 	s.RegisterService(&Producer_ServiceDesc, srv)
+}
+
+func _Producer_StreamProducerEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(reflexpb.StreamRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ProducerServer).StreamProducerEvents(m, &producerStreamProducerEventsServer{stream})
+}
+
+type Producer_StreamProducerEventsServer interface {
+	Send(*reflexpb.Event) error
+	grpc.ServerStream
+}
+
+type producerStreamProducerEventsServer struct {
+	grpc.ServerStream
+}
+
+func (x *producerStreamProducerEventsServer) Send(m *reflexpb.Event) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _Producer_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -100,6 +159,12 @@ var Producer_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Producer_Ping_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamProducerEvents",
+			Handler:       _Producer_StreamProducerEvents_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "producer.proto",
 }

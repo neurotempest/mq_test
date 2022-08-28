@@ -66,6 +66,8 @@ func ServeGRPCForever(st state.State) func() {
 	log.Println("GRPC listening on", *grpcAddr, "...")
 
 	return func() {
+		log.Println("waiting for producer server to stop...")
+		srv.Stop()
 		log.Println("waiting for grpc server to stop...")
 		grpcServer.GracefulStop()
 	}

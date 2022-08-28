@@ -4,7 +4,10 @@ package producer;
 
 option go_package='github.com/neurotempest/mq_test/reflex/src/producer/pb';
 
+import "github.com/luno/reflex/reflexpb/reflex.proto";
+
 service Producer {
+  rpc StreamProducerEvents (reflexpb.StreamRequest) returns (stream reflexpb.Event) {}
   rpc Ping (PingRequest) returns (PingResponse) {}
 }
 

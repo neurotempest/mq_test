@@ -20,14 +20,16 @@ for service in services:
     '{0}-go-compile'.format(service),
     'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build/{0}_main ./src/{0}/{0}'.format(service),
     deps=['./src/{0}/'.format(service)],
+    resource_deps=['mysql'],
     labels=['services'],
   )
 
   local_resource(
     name='{0}-db'.format(service),
     cmd=''.join((
-      '{0} -e "drop database if exists {1}_db; create database {1}_db" &&',
-      '{0} {1}_db < src/{1}/db/schema.sql',
+      '{0} -e "drop database if exists {1}_db; drop user if exists \'{1}\'@\'%\'; create database {1}_db" &&',
+      '{0} {1}_db < src/{1}/db/schema.sql &&',
+      '{0} {1}_db < src/{1}/db/permissions.sql',
     )).format(mysql_cmd, service),
     resource_deps=['mysql'],
     labels=['db'],

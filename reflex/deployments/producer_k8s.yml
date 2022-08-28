@@ -34,6 +34,7 @@ spec:
             #- -c
             #- sleep infinity
             - /build/producer_main
+            - -db_uri=producer:@tcp(mysql-server:3306)/producer_db
             - -consumer_grpc_address=consumer-api:5678
           ports:
             - containerPort: 1234
