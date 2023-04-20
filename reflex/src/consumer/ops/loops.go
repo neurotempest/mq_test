@@ -6,6 +6,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/luno/fate"
+	"github.com/luno/reflex"
+	"github.com/luno/reflex/rpatterns"
+
+	db_cursors "github.com/neurotempest/mq_test/reflex/src/consumer/db/cursors"
 	"github.com/neurotempest/mq_test/reflex/src/consumer/state"
 )
 
@@ -16,6 +21,7 @@ func StartLoops(
 ) {
 
 	pingProducerForever(ctx, wg, s)
+	consumeProducerEventsForever(ctx, s)
 }
 
 func pingProducerForever(
@@ -40,3 +46,45 @@ func pingProducerForever(
 		}
 	}()
 }
+
+func consumeProducerEventsForever(
+	ctx context.Context,
+	s state.State,
+) {
+
+	go func() {
+
+		// Wait afew seconds before starting the reflex consumer;
+		// otherwise it tries to grab events immediately and fails
+		// (if the `producer` service is stood up at the same time)
+		// triggering the 1 minute error backoff, meaning we don't
+		// start consuming events for 1 minute.
+		//select {
+		//	case <-time.After(5*time.Second):
+		//}
+
+		log.Println("starting consumer...")
+
+		spec := reflex.NewSpec(
+			s.GetProducerClient().StreamProducerEvents,
+			db_cursors.ToStore(s.GetDb()),
+			reflex.NewConsumer(
+				"producer_event_consumer",
+				consumeProducerEvent,
+			),
+		)
+
+		rpatterns.RunForever(context.Background, spec)
+	}()
+}
+
+func consumeProducerEvent(
+	ctx context.Context,
+	f fate.Fate,
+	e *reflex.Event,
+) error {
+
+	log.Println("consumed producer event: ID", e.ID, "type", e.Type, "foreign ID", e.ForeignID)
+	return f.Tempt()
+}
+

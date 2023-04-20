@@ -34,7 +34,7 @@ spec:
             #- -c
             #- sleep infinity
             - /build/consumer_main
-            - -db_uri=consumer:@tcp(mysql-server:3306)/consumer_db
+            - -db_uri=consumer:@tcp(mysql-server:3306)/consumer_db?parseTime=true
             - -producer_grpc_address=producer-api:1234
           ports:
             - containerPort: 5678

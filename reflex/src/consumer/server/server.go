@@ -15,9 +15,9 @@ type server struct {
 	state state.State
 }
 
-func New(st state.State) server {
+func New(st state.State) *server {
 
-	return server{
+	return &server{
 		state: st,
 	}
 }
