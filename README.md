@@ -2,6 +2,10 @@ A playground to test various message queueing frameworks
 
 ## Setup notes
 
+### Update 20240722
+
+* seems that `protoc` is no longer a brew formula; but you can now install `proto-gen-go` and `proto-gen-go-grpc` via brew instead
+
 ### protoc & proto-gen-go
 
 * `protoc`, the Protobuf compiler, can be installed with `brew install protoc`
